@@ -117,6 +117,10 @@ export default function Home() {
 
   const processAudio = async (blob: Blob) => {
     try {
+      if (!API_KEY) {
+        throw new Error("Missing Gemini API Key. Please add NEXT_PUBLIC_GEMINI_API_KEY in your Netlify dashboard under Site configuration > Environment variables.");
+      }
+
       const base64Audio = await blobToBase64(blob);
       const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" }, { apiVersion: "v1beta" });
 
@@ -183,6 +187,10 @@ export default function Home() {
   const generateReport = async () => {
     setIsGeneratingReport(true);
     try {
+      if (!API_KEY) {
+        throw new Error("Missing Gemini API Key. Please add NEXT_PUBLIC_GEMINI_API_KEY in your Netlify dashboard under Site configuration > Environment variables.");
+      }
+
       const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" }, { apiVersion: "v1beta" });
       const sessionContent = transcripts.map(t => `[${t.time}] ${t.speaker} (${t.detectedLanguage}): ${t.originalText} | Translation: ${t.translatedText}`).join("\n");
 
@@ -206,8 +214,9 @@ export default function Home() {
         setReportData(JSON.parse(jsonMatch[0]));
         setShowSummary(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Report Generation Error:", err);
+      alert(err.message || "Failed to generate report.");
     } finally {
       setIsGeneratingReport(false);
     }
